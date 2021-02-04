@@ -41,7 +41,7 @@ router.post('/', async function (req, res, next) {
         const result = await db.query(
             `INSERT into companies
             (comp_code, amt) VALUES ($1,$2) RETURNING id,comp_code, amt,paid,add_date,paid_date`, [comp_code,amt])
-        return res.json({ "invoices": result.rows[0] })
+        return res.json({ "invoice": result.rows[0] })
     } catch (error) {
         return next(error);
     }
@@ -81,7 +81,7 @@ router.delete('/:id', async function (req, res, next) {
         if (companyQuery.rows.length === 0) {
             throw new ExpressError('Company not found', 404);
         }
-        return res.json({ 'message': 'Invoice Deleted' })
+        return res.json({ msg: 'Invoice Deleted!' })
     
     } catch (error) {
         return next(error);

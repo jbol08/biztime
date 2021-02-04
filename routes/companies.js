@@ -19,11 +19,15 @@ router.get('/:code', async function (req, res, next) {
     try {
         let code = req.params.code;
         const companyQuery = await db.query('SELECT code,name,description FROM companies WHERE code = $1', [code])
+        const invoiceQuery = await db.query(`SELECT id FROM invoices WHERE comp_code = $1`, [code]);
+        
         if (companyQuery.rows.length === 0) {
             throw new ExpressError('Company not found', 404);
             
         }
-        return res.json({ 'company': companyQuery.rows[0] })
+        
+        companyQuery.rows[0].invoiceQuery.rows = invoiceQuery.rows.map(inv => inv.id);
+        return res.json({ 'company': company })
         
     } catch (error) {
         return next(error);
@@ -37,7 +41,7 @@ router.post('/', async function (req, res, next) {
 
         const companyQuery = await db.query(
             `INSERT into companies
-            (code,name,description) VALUES ($1,$2,3) RETURNING code, name,description`, [code,name,description])
+            (code,name,description) VALUES ($1,$2,$3) RETURNING code, name,description`, [code,name,description])
         return res.json({ "company": companyQuery.rows[0] })
     } catch (error) {
         return next(error);
@@ -53,7 +57,7 @@ router.put('/:code', async function (req, res, next) {
         if (companyQuery.rows.length === 0) {
             throw new ExpressError('Company not found', 404);
         }
-        return res.json({ 'Company': companyQuery.rows[0] })
+        return res.json({ 'company': companyQuery.rows[0] })
         
     } catch (error) {
         return next(error);
@@ -67,7 +71,7 @@ router.delete('/:code', async function (req, res, next) {
         if (companyQuery.rows.length === 0) {
             throw new ExpressError('Company not found', 404);
         }
-        return res.json({ 'message': 'Company Deleted' })
+        return res.json({ msg: 'Company Deleted!' })
         
     } catch (error) {
         return next(error);
